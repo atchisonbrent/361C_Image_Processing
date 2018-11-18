@@ -25,16 +25,16 @@ typedef struct tagBITMAPFILEHEADER {
 #pragma pack(push, 1)
 
 typedef struct tagBITMAPINFOHEADER {
-    double biSize;  //specifies the number of bytes required by the struct
-    long biWidth;  //specifies width in pixels
-    long biHeight;  //species height in pixels
-    int biPlanes; //specifies the number of color planes, must be 1
-    int biBitCount; //specifies the number of bit per pixel
-    double biCompression;//spcifies the type of compression
-    double biSizeImage;  //size of image in bytes
-    long biXPelsPerMeter;  //number of pixels per meter in x axis
-    long biYPelsPerMeter;  //number of pixels per meter in y axis
-    double biClrUsed;  //number of colors used by th ebitmap
+    double biSize;          //specifies the number of bytes required by the struct
+    long biWidth;           //specifies width in pixels
+    long biHeight;          //species height in pixels
+    int biPlanes;           //specifies the number of color planes, must be 1
+    int biBitCount;         //specifies the number of bit per pixel
+    double biCompression;   //spcifies the type of compression
+    double biSizeImage;     //size of image in bytes
+    long biXPelsPerMeter;   //number of pixels per meter in x axis
+    long biYPelsPerMeter;   //number of pixels per meter in y axis
+    double biClrUsed;       //number of colors used by th ebitmap
     double biClrImportant;  //number of colors that are important
 } BITMAPINFOHEADER;
 
@@ -50,8 +50,10 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
     
     //open filename in read binary mode
     filePtr = fopen(filename,"rb");
-    if (filePtr == NULL)
+    if (filePtr == NULL) {
+        printf("Failed to open file!\n");
         return NULL;
+    }
     
     //read the bitmap file header
     fread(&bitmapFileHeader, sizeof(BITMAPFILEHEADER),1,filePtr);
@@ -59,12 +61,13 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
     //verify that this is a bmp file by check bitmap id
     if (bitmapFileHeader.bfType !=0x4D42)
     {
+        printf("Not a .bmp file!\n");
         fclose(filePtr);
         return NULL;
     }
     
     //read the bitmap info header
-    fread(bitmapInfoHeader, sizeof(BITMAPINFOHEADER),1,filePtr); // small edit. forgot to add the closing bracket at sizeof
+    fread(bitmapInfoHeader, sizeof(BITMAPINFOHEADER),1,filePtr);
     
     //move file point to the begging of bitmap data
     fseek(filePtr, bitmapFileHeader.bfOffBits, SEEK_SET);
@@ -75,13 +78,14 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
     //verify memory allocation
     if (!bitmapImage)
     {
+        printf("Memory allocation invalid!\n");
         free(bitmapImage);
         fclose(filePtr);
         return NULL;
     }
     
     //read in the bitmap image data
-    fread(bitmapImage,bitmapInfoHeader->biSizeImage,filePtr);
+    fread(bitmapImage,bitmapInfoHeader->biSizeImage,1,filePtr);
     
     //make sure bitmap image data was read
     if (bitmapImage == NULL)
@@ -103,5 +107,12 @@ unsigned char *LoadBitmapFile(char *filename, BITMAPINFOHEADER *bitmapInfoHeader
     return bitmapImage;
 }
 
-BITMAPINFOHEADER bitmapInfoHeader;
-unsigned char *bitmapData;
+int main(int argc, char* argv[]) {
+    BITMAPINFOHEADER bitmapInfoHeader;
+    printf("Filename: %s\n", argv[1]);
+    char *fileName = argv[1];
+    unsigned char *bitmapData = LoadBitmapFile(fileName,&bitmapInfoHeader);
+    for(int i = 0; i < bitmapInfoHeader.biSizeImage; i++) {
+        printf("%c\n", bitmapData[i]);
+    }
+}
