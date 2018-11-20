@@ -176,7 +176,7 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         }
 }
 
-__global__ 
+__global__ void
 medianFilter(unsigned char* input_image, unsigned char* output_image, int width, int height){
 
 	const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
@@ -189,7 +189,7 @@ medianFilter(unsigned char* input_image, unsigned char* output_image, int width,
 		unsigned char filterVectorGreen[9] = {0,0,0,0,0,0,0,0,0};
 		unsigned char filterVectorBlue[9] = {0,0,0,0,0,0,0,0,0};
 
-		if(row == 0 || row == height - 1 || col == 0 || col = width - 1){
+		if(y == 0 || y == height - 1 || x == 0 || x == width - 1){
 			output_image[offset*3] = input_image[offset];
 			output_image[offset*3 + 1] = input_image[offset + 1];
 			output_image[offset*3 + 2] = input_image[offset + 2];
@@ -207,9 +207,9 @@ medianFilter(unsigned char* input_image, unsigned char* output_image, int width,
 					}
 				}
 			}
-			sort(&filterVectorRed);
-			sort(&filterVectorGreen);		
-			sort(&filterVectorBlue);
+			sort(filterVectorRed);
+			sort(filterVectorGreen);		
+			sort(filterVectorBlue);
 
 			output_image[offset*3] = filterVectorRed[4];
 			output_image[offset*3 + 1] = filterVectorGreen[4];
@@ -282,7 +282,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
 
     // timet_t start, end;
     // start = clock();
-    blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
+    medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
     // end = clock();
     // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
 
