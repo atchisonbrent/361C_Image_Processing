@@ -10,7 +10,7 @@ This project requires:
 * The [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
   * This toolkit includes `NVCC` - the NVIDIA C/C++ CUDA Compiler
 
-To compile and run the project, execute the following commands:
+To compile the project, execute the following commands:
 ```
 git clone https://github.com/atchisonbrent/361C_Image_Processing.git
 ```
@@ -20,11 +20,19 @@ cd /path/to/361C_Image_Processing
 ```
 nvcc lodepng.cpp main.cu -o filter
 ```
+
+To execute the project, run the following command:
+
+For Windows:
 ```
-./filter input_image.png output_image.png <b, g, i, m>
+filter.exe input_image.png output_image.png <b, g, i>
+```
+For Mac or Linux:
+```
+./filter input_image.png output_image.png <b, g, i>
 ```
 Where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
-`<b, g, i, m>` corresponds to `blur`, `greyscale`, `invert`, and `median` respectively.
+`<b, g, i>` corresponds to `blur`, `greyscale`, and `invert` respectively.
 
 ## Outputs 
 ### 1. Blur Image
