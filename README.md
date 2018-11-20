@@ -10,6 +10,6 @@ The goal of this project is to apply filters or edits to existing images using C
 Uhhh, yeah idk.
 
 ## Outputs 
-### 1. Blur
-### 2. Invert
+### 1. Blur Image
+### 2. Invert Colors
 ![Invert](/evilbevo.png)
