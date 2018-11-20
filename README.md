@@ -7,7 +7,7 @@ The goal of this project is to apply filters or edits to existing images using C
 ![Bevo](/images/bevo.png)
 
 ## Usage
-This projects requires an NVIDIA GPU and a working installation of NVCC - the NVIDIA C/C++ CUDA Compiler.
+This projects requires an NVIDIA GPU and a working installation of `NVCC` - the NVIDIA C/C++ CUDA Compiler.
 
 To compile the project, run the following command in the main folder directory:
 ```
