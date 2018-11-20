@@ -36,38 +36,37 @@ void mirror(unsigned char* input_image, unsigned char* output_image, int width, 
     output_image[myId_new] = input_image[myId];
 }
 
-// __global__ void d_filter(int *g_idata, int *g_odata, unsigned int width, unsigned int height){
-//     __shared__ int smem[BLOCK_W*BLOCK_H];
-//     int x = blockIdx.x*TILE_W + threadIdx.x - R;
-//     int y = blockIdx.y*TILE_H + threadIdx.y - R;
+__global__ 
+void simple_filter(int *input_image, int *g_odata, unsigned int width, unsigned int height){
+    __shared__ int smem[BLOCK_W*BLOCK_H];
+    int x = blockIdx.x*TILE_W + threadIdx.x - R;
+    int y = blockIdx.y*TILE_H + threadIdx.y - R;
 
-//     x = max(0, x);
-//     x = min(x, width-1);
-//     y = max(y, 0);
-//     y = min(y, height-1);
+    x = max(0, x);
+    x = min(x, width-1);
+    y = max(y, 0);
+    y = min(y, height-1);
 
-//     unsigned int index = y*width + x;
-//     unsigned int bindex = threadIdx.y*blockDim.y+threadIdx.x;
+    unsigned int index = y*width + x;
+    unsigned int bindex = threadIdx.y*blockDim.y+threadIdx.x;
 
-//     smem[bindex] = g_idata[index];
-//     __syncthreads();
+    smem[bindex] = input_image[index];
+    __syncthreads();
 
-//     if((threadIdx.x >= R) && (threadIdx.x < (BLOCK_W-R)) && (threadIdx.y >= R) && (threadIdx.y < (BLOCK_H-R))){
-//         float sum = 0;
-//         for(int dy = -R; dy <= R; dy++){
-//             for(int dx = -R; dx <= R; dx++){
-//                 float i = smem[bindex + (dy*blockDim.x) + dx];
-//                 sum += i;
-//             }
-//         }
-//         g_odata[index] = sum/S;
-//     }
-// }
+    if((threadIdx.x >= R) && (threadIdx.x < (BLOCK_W-R)) && (threadIdx.y >= R) && (threadIdx.y < (BLOCK_H-R))){
+        float sum = 0;
+        for(int dy = -R; dy <= R; dy++){
+            for(int dx = -R; dx <= R; dx++){
+                float i = smem[bindex + (dy*blockDim.x) + dx];
+                sum += i;
+            }
+        }
+        g_odata[index] = sum/S;
+    }
+}
 
 __global__
 void blur(unsigned char* input_image, unsigned char* output_image, int width, int height) {
-    timet_t start, end;
-    start = clock();
     const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
     int x = offset % width;
     int y = (offset-x)/width;
@@ -93,8 +92,6 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         output_image[offset*3+1] = output_green/hits;
         output_image[offset*3+2] = output_blue/hits;
         }
-        end = clock();
-        std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
 }
 
 // __global__ void colorConvert(unsigned char * rgbImage, unsigned char * grayImage, int width, int height) {
@@ -124,7 +121,11 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     dim3 blockDims(512,1,1);
     dim3 gridDims((unsigned int) ceil((double)(width*height*3/blockDims.x)), 1, 1 );
 
+    timet_t start, end;
+    start = clock();
     colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
+    end = clock();
+    std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
 
 
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
