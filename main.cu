@@ -55,11 +55,12 @@ void greyscale(unsigned char* input_image, unsigned char* output_image, int widt
         float output_red = input_image[currentoffset];
         float output_green = input_image[currentoffset + 1];
         float output_blue = input_image[currentoffset + 2];
+        float output_color = 0.21 * output_red + 0.72 * output_green + 0.07 * output_blue;
         
         /* Assign Inverted Color Values */
-        output_image[offset * 3] = 0.299 * output_red;
-        output_image[offset * 3 + 1] = 0.587 * output_green;
-        output_image[offset * 3 + 2] = 0.114 * output_blue;
+        output_image[offset * 3] = output_color;
+        output_image[offset * 3 + 1] = output_color;
+        output_image[offset * 3 + 2] = output_color;
     }
 }
 
