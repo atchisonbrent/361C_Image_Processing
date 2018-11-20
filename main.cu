@@ -57,9 +57,9 @@ void greyscale(unsigned char* input_image, unsigned char* output_image, int widt
         float output_blue = input_image[currentoffset + 2];
         
         /* Assign Inverted Color Values */
-        output_image[offset * 3] = 0.299 * output_red;
-        output_image[offset * 3 + 1] = 0.587 * output_green;
-        output_image[offset * 3 + 2] = 0.114 * output_blue;
+        output_image[offset * 3] = 0.21 * output_red + 0.72 * output_green + 0.07 * output_blue;
+        output_image[offset * 3 + 1] = 0.21 * output_red + 0.72 * output_green + 0.07 * output_blue;
+        output_image[offset * 3 + 2] = 0.21 * output_red + 0.72 * output_green + 0.07 * output_blue;
     }
 }
 
@@ -194,7 +194,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
     
     /* Invert */
-    invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    // invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
     /* Greyscale */
     greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
