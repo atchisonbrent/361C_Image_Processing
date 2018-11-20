@@ -26,6 +26,8 @@ Where `input_image.png` is the original image and `output_image.png` is an exist
 
 ## Outputs 
 ### 1. Blur Image
-![Invert](/images/blurbevo.png)
+![Blur](/images/blurbevo.png)
 ### 2. Invert Colors
 ![Invert](/images/evilbevo.png)
+### 3. Greyscale
+![Greyscale](/images/greybevo.png)
