@@ -1,4 +1,5 @@
 #include "lodepng.h"
+#include "helper_cuda.h"
 #include <iostream>
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -6,7 +7,7 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
-#include <>
+#include <timer.h>
 
 
 #define TILE_W  16
@@ -102,6 +103,44 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
 //     }
 // }
 
+const int BLOCKDIM = 32;
+const int sigma1 = 50;
+const int sigma2 = 50;
+
+__device__ const int FILTER_SIZE = 9;
+__device__ const int FILTER_HALFSIZE = FILTER_SIZE >> 1;
+
+__global__ 
+void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width, int height)
+{
+	const int x = blockIdx.x * blockDim.x + threadIdx.x;
+	const int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+	if((x<width) && (y<height))
+	{
+		float running_total = 0;
+		float norm_factor = 0;
+		const int offset = y * width + x;
+		for (int xctr = -FILTER_HALFSIZE; xctr <= FILTER_HALFSIZE; xctr++) 
+		{
+			for (int yctr = -FILTER_HALFSIZE; yctr <= FILTER_HALFSIZE; yctr++) 
+			{
+				int y_iter = y + xctr;
+				int x_iter = x + yctr;
+				if (x_iter < 0) x_iter = -x_iter;
+				if (y_iter < 0) y_iter = -y_iter;
+				if (x_iter > width-1) x_iter = width-1-xctr;
+				if (y_iter > height-1) y_iter = height-1-yctr;
+				float intensity_change = input[y_iter * width + x_iter] - input[y * width + x];
+				float w1 = exp(-(xctr * xctr + yctr * yctr) / (2 * sigma1 * sigma1));
+				float w2 = exp(-(intensity_change * intensity_change) / (2 * sigma2 * sigma2));
+				running_total += input[y_iter * width + x_iter] * w1 * w2;
+				norm_factor += w1 * w2;
+			}
+		}
+		output[offset] = running_total / norm_factor;
+	}
+}
 
 void getError(cudaError_t err) {
     if(err != cudaSuccess) {
