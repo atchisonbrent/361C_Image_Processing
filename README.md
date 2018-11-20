@@ -22,7 +22,7 @@ nvcc lodepng.cpp main.cu -o filter
 ```
 ./filter input_image.png output_image.png
 ```
-where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
+Where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
 
 ## Outputs 
 ### 1. Blur Image
