@@ -192,6 +192,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     // end = clock();
     // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
 
+    /* Bilateral*/
     const dim3 blockSize(32,32);
     const dim3 gridSize(width/32, height/32);
     
