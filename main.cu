@@ -284,7 +284,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     
     /* Bilateral Filter */
     if (arg[0] == 'b') {
-        bilateral_filter_2d<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+        blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     }
     
     /* Greyscale */
@@ -298,7 +298,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     }
     
     /* Median */
-    else if (arg[0] == 'i') {
+    else if (arg[0] == 'm') {
         medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     }
     
@@ -343,7 +343,7 @@ int main(int argc, char *argv[]){
         printf("Command should be of the form: ./filter input_image.png output_image.png <b, g, i, m>\n");
         exit(1);
     }
-    else { filter(input_image, output_image, width, height, tolower(argv[3])); }
+    else { filter(input_image, output_image, width, height, argv[3]); }
 
     // Prepare data for output
     std::vector<unsigned char> out_image;
