@@ -46,11 +46,13 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
     
     /* Check if Offset is Within Bounds */
     if (offset < width * height) {
+        
+        const int currentoffset = offset * width * 3;
 
         /* Get Current Color Values */
-        float output_red = input_image[offset];
-        float output_green = input_image[offset + 1];
-        float output_blue = input_image[offset + 2];
+        float output_red = input_image[currentoffset];
+        float output_green = input_image[currentoffset + 1];
+        float output_blue = input_image[currentoffset + 2];
         
         /* Assign Inverted Color Values */
         output_image[offset * 3] = 255 - output_red;
@@ -157,8 +159,6 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     
     /* Invert */
     invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-
-    invert<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
