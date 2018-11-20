@@ -2,15 +2,15 @@
 
 The goal of this project is to apply filters or edits to existing images using CUDA to highly parallelize the compute operations.
 
-##Timings Go Here
+## Timings Go Here
 
 ## Input Image
-Bevo
+###Bevo
 ![Bevo](/bevo.png)
 
 ## Usage
 
 ## Outputs 
- 1. Blur
- 2. Invert
- ![Invert](/evilbevo.png)
+### Blur
+### Invert
+![Invert](/evilbevo.png)
