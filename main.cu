@@ -6,6 +6,7 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
+#include <>
 
 #define TILE_W  16
 #define TILE_H  16
@@ -72,7 +73,8 @@
 
 __global__
 void blur(unsigned char* input_image, unsigned char* output_image, int width, int height) {
-
+    timet_t start, end;
+    start = clock();
     const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
     int x = offset % width;
     int y = (offset-x)/width;
@@ -98,6 +100,8 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         output_image[offset*3+1] = output_green/hits;
         output_image[offset*3+2] = output_blue/hits;
         }
+        end = clock();
+        std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
 }
 
 void getError(cudaError_t err) {
