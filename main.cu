@@ -111,8 +111,8 @@ void h_average(unsigned char* input_image, unsigned char* output_image, int widt
 
         if(offset > 0 && offset < width*height - 1) {
             float output_red = (input_image[currentoffset] + input_image[(offset-1)*3] + input_image[(offset+1)*3])/3;
-            float output_green = input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
-            float output_blue = input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;  
+            float output_green = (input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
+            float output_blue = (input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;  
         }
         else {
             float output_red = input_image[currentoffset];
@@ -121,7 +121,7 @@ void h_average(unsigned char* input_image, unsigned char* output_image, int widt
         }
 
 
-        float output_red_prev = input_image[]
+        
         
         /* Assign Inverted Color Values */
         output_image[offset * 3] = 255 - output_red;
