@@ -324,6 +324,10 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     if (arg[0] == 'b') {
         bilateral_filter_2d<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     }
+
+    else if (arg[0] == 'a') {
+        h_average<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    }
     
     /* Greyscale */
     else if (arg[0] == 'g') {
