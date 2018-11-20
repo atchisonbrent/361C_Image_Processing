@@ -320,31 +320,31 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     // end = clock();
     // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
     
-    /* Bilateral Filter */
-    if (arg[0] == 'b') {
-        blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-    }
-
-    else if (arg[0] == 'a') {
-        h_average<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-    }
-    
-    /* Greyscale */
-    else if (arg[0] == 'g') {
-        greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-    }
-    
-    /* Invert */
-    else if (arg[0] == 'i') {
-        invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-    }
-    
-    /* Median */
-    else if (arg[0] == 'm') {
-        medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-    }
-    
-    else { printf("Invalid Argument. Options are: b, g, i, m\n"); exit(1); }
+    switch (arg[0]) {
+        
+        /* Blur */
+        case 'b':
+        case 'B':
+            blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+            
+        /* Greyscale */
+        case 'g':
+        case 'G':
+            greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+            
+        /* Invert */
+        case 'i':
+        case 'I':
+            invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+        
+        /* Median */
+        case 'm':
+        case 'M':
+            medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+        
+        /* Invalid Argument */
+        default:
+            printf("Invalid Argument. Options are: b, g, i, m\n"); exit(1);
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
