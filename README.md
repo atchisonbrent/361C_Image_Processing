@@ -14,6 +14,9 @@ This project requires:
 
 To compile and run the project, execute the following commands:
 ```
+git clone https://github.com/atchisonbrent/361C_Image_Processing.git
+```
+```
 cd /path/to/361C_Image_Processing
 ```
 ```
