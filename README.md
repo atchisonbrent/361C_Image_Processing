@@ -16,7 +16,7 @@ The goal of this project is to apply filters or edits to existing images using C
 ---
 2. To **compile** the project, execute the following commands:
 ```
-git clone https://github.com/atchisonbrent/361C_Image_Processing.git\
+git clone https://github.com/atchisonbrent/361C_Image_Processing.git
 
 cd /path/to/361C_Image_Processing
 
