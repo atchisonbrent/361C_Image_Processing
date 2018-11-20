@@ -195,11 +195,18 @@ medianFilter(unsigned char* input_image, unsigned char* output_image, int width,
 			output_image[offset * 3 + 2] = input_image[offset + 2];
 		}
 		else {
-            const int currentOffset = offset * 3;
-            
-            filterVectorRed[i] = input_image[currentOffset];
-            filterVectorGreen[i] = input_image[currentOffset + 1];
-            filterVectorBlue[i] = input_image[currentOffset + 2];
+            int i = 0;
+            for (int dx = -1; dx <= 1; dx++){
+                for (int dy = -1; dy <= 1; dy++){
+                    if ((x + dx) > -1 && (x + dx) < width && (y + dy) > -1 && (y + dy) < height) {
+                        const int currentOffset = (offset+dx+dy*width)*3;
+                        filterVectorRed[i] = input_image[currentOffset];
+                        filterVectorGreen[i] = input_image[currentOffset + 1];
+                        filterVectorBlue[i] = input_image[currentOffset + 2];
+                        i++;
+                    }
+                }
+            }
             
 			sort(filterVectorRed);
 			sort(filterVectorGreen);		
