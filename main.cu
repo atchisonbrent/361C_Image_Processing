@@ -264,7 +264,7 @@ void getError(cudaError_t err) {
     }
 }
 
-void filter (unsigned char* input_image, unsigned char* output_image, int width, int height) {
+void filter (unsigned char* input_image, unsigned char* output_image, int width, int height, char* arg) {
 
     unsigned char* dev_input;
     unsigned char* dev_output;
@@ -273,31 +273,36 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
  
     getError(cudaMalloc( (void**) &dev_output, width*height*3*sizeof(unsigned char)));
 
-    /* Dimentions */
+    /* Dimensions */
     dim3 blockDims(512, 1, 1);
     dim3 gridDims((unsigned int) ceil((double)(width*height * 3 / blockDims.x)), 1, 1 );
 
     // timet_t start, end;
     // start = clock();
-    medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
     // end = clock();
     // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
-
-    /* Bilateral*/
-//    const dim3 blockDims(64, 64);
-//    const dim3 gridDims(width / 64, height / 64);
-    
-    /* Invert */
-//     invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-    
-    /* Greyscale */
-//    greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-    
-    /* Mirror */
-    // mirror<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
     /* Bilateral Filter */
-//    bilateral_filter_2d<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    if (arg[0] == 'b') {
+        bilateral_filter_2d<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    }
+    
+    /* Greyscale */
+    else if (arg[0] == 'g') {
+        greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    }
+    
+    /* Invert */
+    else if (arg[0] == 'i') {
+        invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    }
+    
+    /* Median */
+    else if (arg[0] == 'i') {
+        medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    }
+    
+    else { printf("Invalid Argument. Options are: b, g, i, m\n"); exit(1); }
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
@@ -333,7 +338,12 @@ int main(int argc, char *argv[]){
     }
 
     // Run the filter on it
-    filter(input_image, output_image, width, height); 
+    if (argc < 4) {
+        printf("Invalid Usage\n");
+        printf("Command should be of the form: ./filter input_image.png output_image.png <b, g, i, m>\n");
+        exit(1);
+    }
+    else { filter(input_image, output_image, width, height, tolower(argv[3])); }
 
     // Prepare data for output
     std::vector<unsigned char> out_image;
