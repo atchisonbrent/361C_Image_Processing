@@ -1,5 +1,5 @@
 #include "lodepng.h"
-#include "helper_cuda.h"
+// #include "helper_cuda.h"
 #include <iostream>
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -20,27 +20,6 @@
 #define CHANNELS 3
 
 __global__
-void mirror(unsigned char* input_image, unsigned char* output_image, int width, int height) {
-    
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if ( row >= width || col >= height ) { return; }
-
-    int thread_x = blockDim.x * blockIdx.x + threadIdx.x;
-    int thread_y = blockDim.y * blockIdx.y + threadIdx.y;
-
-    int thread_x_new = thread_x;
-    int thread_y_new = width - thread_y;
-
-    int myId = thread_y * height + thread_x;
-    int myId_new = thread_y_new * height + thread_x_new;
-
-    output_image[myId_new] = input_image[myId];
-    
-}
-
-__global__
 void invert(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
     const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
@@ -48,8 +27,8 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
     /* Check if Offset is Within Bounds */
     if (offset < width * height) {
         
-        const int currentoffset = offset * width * 3;
-
+        const int currentoffset = offset * 3;
+        
         /* Get Current Color Values */
         float output_red = input_image[currentoffset];
         float output_green = input_image[currentoffset + 1];
@@ -59,6 +38,28 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
         output_image[offset * 3] = 255 - output_red;
         output_image[offset * 3 + 1] = 255 - output_green;
         output_image[offset * 3 + 2] = 255 - output_blue;
+    }
+}
+
+__global__
+void greyscale(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+    
+    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    /* Check if Offset is Within Bounds */
+    if (offset < width * height) {
+        
+        const int currentoffset = offset * 3;
+        
+        /* Get Current Color Values */
+        float output_red = input_image[currentoffset];
+        float output_green = input_image[currentoffset + 1];
+        float output_blue = input_image[currentoffset + 2];
+        
+        /* Assign Inverted Color Values */
+        output_image[offset * 3] = 0.299 * output_red;
+        output_image[offset * 3 + 1] = 0.587 * output_green;
+        output_image[offset * 3 + 2] = 0.114 * output_blue;
     }
 }
 
@@ -136,37 +137,37 @@ const int sigma2 = 50;
 __device__ const int FILTER_SIZE = 9;
 __device__ const int FILTER_HALFSIZE = FILTER_SIZE >> 1;
 
-__global__ 
-void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width, int height)
-{
-	const int x = blockIdx.x * blockDim.x + threadIdx.x;
-	const int y = blockIdx.y * blockDim.y + threadIdx.y;
+// __global__ 
+// void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width, int height)
+// {
+// 	const int x = blockIdx.x * blockDim.x + threadIdx.x;
+// 	const int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-	if((x<width) && (y<height))
-	{
-		float running_total = 0;
-		float norm_factor = 0;
-		const int offset = y * width + x;
-		for (int xctr = -FILTER_HALFSIZE; xctr <= FILTER_HALFSIZE; xctr++) 
-		{
-			for (int yctr = -FILTER_HALFSIZE; yctr <= FILTER_HALFSIZE; yctr++) 
-			{
-				int y_iter = y + xctr;
-				int x_iter = x + yctr;
-				if (x_iter < 0) x_iter = -x_iter;
-				if (y_iter < 0) y_iter = -y_iter;
-				if (x_iter > width-1) x_iter = width-1-xctr;
-				if (y_iter > height-1) y_iter = height-1-yctr;
-				float intensity_change = input[y_iter * width + x_iter] - input[y * width + x];
-				float w1 = exp(-(xctr * xctr + yctr * yctr) / (2 * sigma1 * sigma1));
-				float w2 = exp(-(intensity_change * intensity_change) / (2 * sigma2 * sigma2));
-				running_total += input[y_iter * width + x_iter] * w1 * w2;
-				norm_factor += w1 * w2;
-			}
-		}
-		output[offset] = running_total / norm_factor;
-	}
-}
+// 	if((x<width) && (y<height))
+// 	{
+// 		float running_total = 0;
+// 		float norm_factor = 0;
+// 		const int offset = y * width + x;
+// 		for (int xctr = -FILTER_HALFSIZE; xctr <= FILTER_HALFSIZE; xctr++) 
+// 		{
+// 			for (int yctr = -FILTER_HALFSIZE; yctr <= FILTER_HALFSIZE; yctr++) 
+// 			{
+// 				int y_iter = y + xctr;
+// 				int x_iter = x + yctr;
+// 				if (x_iter < 0) x_iter = -x_iter;
+// 				if (y_iter < 0) y_iter = -y_iter;
+// 				if (x_iter > width-1) x_iter = width-1-xctr;
+// 				if (y_iter > height-1) y_iter = height-1-yctr;
+// 				float intensity_change = input[y_iter * width + x_iter] - input[y * width + x];
+// 				float w1 = exp(-(xctr * xctr + yctr * yctr) / (2 * sigma1 * sigma1));
+// 				float w2 = exp(-(intensity_change * intensity_change) / (2 * sigma2 * sigma2));
+// 				running_total += input[y_iter * width + x_iter] * w1 * w2;
+// 				norm_factor += w1 * w2;
+// 			}
+// 		}
+// 		output[offset] = running_total / norm_factor;
+// 	}
+// }
 
 void getError(cudaError_t err) {
     if(err != cudaSuccess) {
@@ -196,13 +197,11 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     const dim3 blockSize(32,32);
     const dim3 gridSize(width/32, height/32);
     
-    /* Mirror */
-//    const dim3 blockSize(4, 4, 1);
-//    const dim3 gridSize(width / blockSize.x + 1, height / blockSize.y + 1, 1);
-//    mirror<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
-    
     /* Invert */
     invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    
+    /* Greyscale */
+    greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
