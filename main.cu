@@ -119,9 +119,6 @@ void h_average(unsigned char* input_image, unsigned char* output_image, int widt
             float output_green = input_image[currentoffset + 1];
             float output_blue = input_image[currentoffset + 2];  
         }
-
-
-        
         
         /* Assign Inverted Color Values */
         output_image[offset * 3] = 255 - output_red;
@@ -348,7 +345,9 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
         
         /* Invalid Argument */
         default:
-            printf("Invalid Argument. Options are: b, g, i, m\n"); exit(1);
+            printf("Invalid Argument. Options are: b, g, i, m\n");
+            exit(1);
+    }
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
