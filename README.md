@@ -46,3 +46,8 @@ Where `input_image.png` is the original image and `output_image.png` is an exist
 ![Invert](/images/evilbevo.png)
 ### 3. Greyscale
 ![Greyscale](/images/greybevo.png)
+### 4. Median Restore
+#### Before
+![Input](/images/med_before.png)
+#### After
+![Output](/images/med_after.png)
