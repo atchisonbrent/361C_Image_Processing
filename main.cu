@@ -48,7 +48,7 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
     /* Check if Offset is Within Bounds */
     if (offset < width * height) {
         
-        const int currentoffset = offset * width * 3;
+        const int currentoffset = offset * 3;
 
         /* Get Current Color Values */
         float output_red = input_image[currentoffset];
