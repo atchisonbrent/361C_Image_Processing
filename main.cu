@@ -39,41 +39,6 @@ void sort(unsigned char* input){
 }
 
 __global__
-void mirror(unsigned char* input_image, unsigned char* output_image, int width, int height) {
-    
-//    int col = 3 * (blockIdx.x * blockDim.x + threadIdx.x);
-//    int row = 3 * (blockIdx.y * blockDim.y + threadIdx.y);
-//
-//    if ( row >= width || col >= height ) { return; }
-//
-//    int col_new = col;
-//    int row_new = width - row;
-//
-//    int myId = row * height + col;
-//    int myId_new = row_new * height + col_new;
-//
-//    output_image[myId_new] = input_image[myId];
-    
-    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    /* Check if Offset is Within Bounds */
-    if (offset < width * height) {
-        
-        const int currentoffset = offset * 3;
-        
-        /* Get Current Color Values */
-        float output_red = input_image[currentoffset];
-        float output_green = input_image[currentoffset + 1];
-        float output_blue = input_image[currentoffset + 2];
-        
-        /* Assign Inverted Color Values */
-        output_image[offset * 3] = output_red;
-        output_image[offset * 3 + 1] = output_green;
-        output_image[offset * 3 + 2] = output_blue;
-    }
-}
-
-__global__
 void invert(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
     const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
@@ -95,37 +60,37 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
     }
 }
 
-__global__
-void h_average(unsigned char* input_image, unsigned char* output_image, int width, int height) {
-    
-    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    /* Check if Offset is Within Bounds */
-    if (offset < width * height) {
-        
-        const int currentoffset = offset * 3;
-        
-        /* Get Current Color Values */
-
-        float output_red, output_green, output_blue;
-
-        if(offset > 0 && offset < width*height - 1) {
-            float output_red = (input_image[currentoffset] + input_image[(offset-1)*3] + input_image[(offset+1)*3])/3;
-            float output_green = (input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
-            float output_blue = (input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;  
-        }
-        else {
-            float output_red = input_image[currentoffset];
-            float output_green = input_image[currentoffset + 1];
-            float output_blue = input_image[currentoffset + 2];  
-        }
-        
-        /* Assign Inverted Color Values */
-        output_image[offset * 3] = 255 - output_red;
-        output_image[offset * 3 + 1] = 255 - output_green;
-        output_image[offset * 3 + 2] = 255 - output_blue;
-    }
-}
+//__global__
+//void h_average(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+//
+//    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
+//
+//    /* Check if Offset is Within Bounds */
+//    if (offset < width * height) {
+//
+//        const int currentoffset = offset * 3;
+//
+//        /* Get Current Color Values */
+//
+//        float output_red, output_green, output_blue;
+//
+//        if(offset > 0 && offset < width*height - 1) {
+//            float output_red = (input_image[currentoffset] + input_image[(offset-1)*3] + input_image[(offset+1)*3])/3;
+//            float output_green = (input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
+//            float output_blue = (input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;
+//        }
+//        else {
+//            float output_red = input_image[currentoffset];
+//            float output_green = input_image[currentoffset + 1];
+//            float output_blue = input_image[currentoffset + 2];
+//        }
+//
+//        /* Assign Inverted Color Values */
+//        output_image[offset * 3] = 255 - output_red;
+//        output_image[offset * 3 + 1] = 255 - output_green;
+//        output_image[offset * 3 + 2] = 255 - output_blue;
+//    }
+//}
 
 __global__
 void greyscale(unsigned char* input_image, unsigned char* output_image, int width, int height) {
@@ -147,35 +112,6 @@ void greyscale(unsigned char* input_image, unsigned char* output_image, int widt
         output_image[offset * 3] = output_color;
         output_image[offset * 3 + 1] = output_color;
         output_image[offset * 3 + 2] = output_color;
-    }
-}
-
-__global__ 
-void simple_filter(int *input_image, int *g_odata, unsigned int width, unsigned int height){
-    __shared__ int smem[BLOCK_W*BLOCK_H];
-    int x = blockIdx.x*TILE_W + threadIdx.x - R;
-    int y = blockIdx.y*TILE_H + threadIdx.y - R;
-
-    x = max(0, x);
-    x = min(x, width-1);
-    y = max(y, 0);
-    y = min(y, height-1);
-
-    unsigned int index = y*width + x;
-    unsigned int bindex = threadIdx.y*blockDim.y+threadIdx.x;
-
-    smem[bindex] = input_image[index];
-    __syncthreads();
-
-    if((threadIdx.x >= R) && (threadIdx.x < (BLOCK_W-R)) && (threadIdx.y >= R) && (threadIdx.y < (BLOCK_H-R))){
-        float sum = 0;
-        for(int dy = -R; dy <= R; dy++){
-            for(int dx = -R; dx <= R; dx++){
-                float i = smem[bindex + (dy*blockDim.x) + dx];
-                sum += i;
-            }
-        }
-        g_odata[index] = sum/S;
     }
 }
 
@@ -208,48 +144,47 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
     }
 }
 
-__global__ void
-medianFilter(unsigned char* input_image, unsigned char* output_image, int width, int height){
-
-	const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
-	int x = offset % width;
-	int y = (offset - x)/width;
-
-	if(offset < width*height){
-	
-		unsigned char filterVectorRed[9] = {0,0,0,0,0,0,0,0,0};
-		unsigned char filterVectorGreen[9] = {0,0,0,0,0,0,0,0,0};
-		unsigned char filterVectorBlue[9] = {0,0,0,0,0,0,0,0,0};
-
-		if(y == 0 || y == height - 1 || x == 0 || x == width - 1){
-			output_image[offset*3] = input_image[offset];
-			output_image[offset*3 + 1] = input_image[offset + 1];
-			output_image[offset*3 + 2] = input_image[offset + 2];
-		}
-		else{
-			int i = 0;
-			for(int dx = -1; dx <= 1; dx++){
-				for(int dy = -1; dy <= 1; dy++){
-					if(x+dx >= 0 && x+dx < width && y+dy >= 0 && y+dy < height){
-						const int currentOffset = (offset+dx+dy*width)*3;
-						filterVectorRed[i] = input_image[currentOffset];
-						filterVectorGreen[i] = input_image[currentOffset + 1];
-						filterVectorBlue[i] = input_image[currentOffset + 2];
-						i++;
-					}
-				}
-			}
-			sort(filterVectorRed);
-			sort(filterVectorGreen);		
-			sort(filterVectorBlue);
-
-			output_image[offset*3] = filterVectorRed[4];
-			output_image[offset*3 + 1] = filterVectorGreen[4];
-			output_image[offset*3 + 2] = filterVectorBlue[4];
-		}
-	}
-
-}
+//__global__ void
+//medianFilter(unsigned char* input_image, unsigned char* output_image, int width, int height){
+//
+//    const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
+//    int x = offset % width;
+//    int y = (offset - x)/width;
+//
+//    if(offset < width*height){
+//
+//        unsigned char filterVectorRed[9] = {0,0,0,0,0,0,0,0,0};
+//        unsigned char filterVectorGreen[9] = {0,0,0,0,0,0,0,0,0};
+//        unsigned char filterVectorBlue[9] = {0,0,0,0,0,0,0,0,0};
+//
+//        if(y == 0 || y == height - 1 || x == 0 || x == width - 1){
+//            output_image[offset*3] = input_image[offset];
+//            output_image[offset*3 + 1] = input_image[offset + 1];
+//            output_image[offset*3 + 2] = input_image[offset + 2];
+//        }
+//        else{
+//            int i = 0;
+//            for(int dx = -1; dx <= 1; dx++){
+//                for(int dy = -1; dy <= 1; dy++){
+//                    if(x+dx >= 0 && x+dx < width && y+dy >= 0 && y+dy < height){
+//                        const int currentOffset = (offset+dx+dy*width)*3;
+//                        filterVectorRed[i] = input_image[currentOffset];
+//                        filterVectorGreen[i] = input_image[currentOffset + 1];
+//                        filterVectorBlue[i] = input_image[currentOffset + 2];
+//                        i++;
+//                    }
+//                }
+//            }
+//            sort(filterVectorRed);
+//            sort(filterVectorGreen);
+//            sort(filterVectorBlue);
+//
+//            output_image[offset*3] = filterVectorRed[4];
+//            output_image[offset*3 + 1] = filterVectorGreen[4];
+//            output_image[offset*3 + 2] = filterVectorBlue[4];
+//        }
+//    }
+//}
 
 __device__ float exp(int i) { return exp((float) i); }
 
@@ -338,14 +273,14 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
             break;
         
         /* Median */
-        case 'm':
-        case 'M':
-            medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-            break;
+//        case 'm':
+//        case 'M':
+//            medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+//            break;
         
         /* Invalid Argument */
         default:
-            printf("Invalid Argument. Options are: b, g, i, m\n");
+            printf("Invalid Argument. Options are: b, g, i\n");
             exit(1);
     }
     
@@ -385,7 +320,7 @@ int main(int argc, char *argv[]){
     // Run the filter on it
     if (argc < 4) {
         printf("Invalid Usage\n");
-        printf("Command should be of the form: ./filter input_image.png output_image.png <b, g, i, m>\n");
+        printf("Command should be of the form: ./filter input_image.png output_image.png <b, g, i>\n");
         exit(1);
     }
     else { filter(input_image, output_image, width, height, argv[3]); }
