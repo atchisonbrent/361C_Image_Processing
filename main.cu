@@ -25,7 +25,7 @@ void sort(unsigned char* input){
 		int iMin = i;
 
 		for(int j = i+1; j < 9; j++){
-			if(input[i] < input[iMin]){
+			if(input[j] < input[iMin]){
 				iMin = j;
 			}
 		}
@@ -95,37 +95,37 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
     }
 }
 
-__global__
-void h_average(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+// __global__
+// void h_average(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
-    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
+//     const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
     
-    /* Check if Offset is Within Bounds */
-    if (offset < width * height) {
+//     /* Check if Offset is Within Bounds */
+//     if (offset < width * height) {
         
-        const int currentoffset = offset * 3;
+//         const int currentoffset = offset * 3;
         
-        /* Get Current Color Values */
+//         /* Get Current Color Values */
 
-        float output_red, output_green, output_blue;
+//         float output_red, output_green, output_blue;
 
-        if(offset > 0 && offset < width*height - 1) {
-            float output_red = (input_image[currentoffset] + input_image[(offset-1)*3] + input_image[(offset+1)*3])/3;
-            float output_green = (input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
-            float output_blue = (input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;  
-        }
-        else {
-            float output_red = input_image[currentoffset];
-            float output_green = input_image[currentoffset + 1];
-            float output_blue = input_image[currentoffset + 2];  
-        }
+//         if(offset > 0 && offset < width*height - 1) {
+//             float output_red = (input_image[currentoffset] + input_image[(offset-1)*3] + input_image[(offset+1)*3])/3;
+//             float output_green = (input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
+//             float output_blue = (input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;  
+//         }
+//         else {
+//             float output_red = input_image[currentoffset];
+//             float output_green = input_image[currentoffset + 1];
+//             float output_blue = input_image[currentoffset + 2];  
+//         }
         
-        /* Assign Inverted Color Values */
-        output_image[offset * 3] = 255 - output_red;
-        output_image[offset * 3 + 1] = 255 - output_green;
-        output_image[offset * 3 + 2] = 255 - output_blue;
-    }
-}
+//         /* Assign Inverted Color Values */
+//         output_image[offset * 3] = 255 - output_red;
+//         output_image[offset * 3 + 1] = 255 - output_green;
+//         output_image[offset * 3 + 2] = 255 - output_blue;
+//     }
+// }
 
 __global__
 void greyscale(unsigned char* input_image, unsigned char* output_image, int width, int height) {
@@ -222,9 +222,9 @@ medianFilter(unsigned char* input_image, unsigned char* output_image, int width,
 		unsigned char filterVectorBlue[9] = {0,0,0,0,0,0,0,0,0};
 
 		if(y == 0 || y == height - 1 || x == 0 || x == width - 1){
-			output_image[offset*3] = input_image[offset];
-			output_image[offset*3 + 1] = input_image[offset + 1];
-			output_image[offset*3 + 2] = input_image[offset + 2];
+			output_image[offset*3] = input_image[offset*3];
+			output_image[offset*3 + 1] = input_image[offset*3 + 1];
+			output_image[offset*3 + 2] = input_image[offset*3 + 2];
 		}
 		else{
 			int i = 0;
