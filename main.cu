@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <stdio.h>
 
+
 #define TILE_W  16
 #define TILE_H  16
 #define R        2
@@ -14,6 +15,8 @@
 #define S    (D*D)
 #define BLOCK_W (TILE_W+(2*R))
 #define BLOCK_H (TILE_H+(2*R))
+
+#define CHANNELS 3
 
 // __global__ void d_filter(int *g_idata, int *g_odata, unsigned int width, unsigned int height){
 //     __shared__ int smem[BLOCK_W*BLOCK_H];
@@ -41,33 +44,6 @@
 //         }
 //         g_odata[index] = sum/S;
 //     }
-// }
-
-// __global__
-// void rgba_to_greyscale(const uchar4* const rgbaImage,
-//                        unsigned char* const greyImage,
-//                        int numRows, int numCols)
-// {
-//   int index_x = blockIdx.x * blockDim.x + threadIdx.x;
-//   int index_y = blockIdx.y * blockDim.y + threadIdx.y;
-
-//   // map the two 2D indices to a single linear, 1D index
-//   int grid_width = gridDim.x * blockDim.x;
-//   int index = index_y * grid_width + index_x;
-  
-//   std::vector<float> xi; //make a temporary list-vector
-//   for(int k=index_x-5/2;k<=index_x+5/2;k++) { //apply the window specified by x and y
-// 	for(int m=index_y-5/2;m<=index_y+5/2;m++) {
-// 		if((k<0)||(m<0)) xi.push_back(0); //on edges of the image use 0 values
-// 		else xi.push_back(rgbaImage[k * numCols + m]);
-// 	}
-//   }				
-//   std::sort(std::begin(xi),std::end(xi));	//sort elements of 'xi' neighbourhood vector 			
-//   greyImage[index]=xi[3]; //replace pixel with element specified by 'rank' (3)				
-  
-//   // write out the final result
-//   greyImage[index] =  .299f * rgbaImage[index].x + .587f * rgbaImage[index].y + .114f * rgbaImage[index].z;
-  
 // }
 
 __global__
@@ -100,6 +76,15 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         }
 }
 
+// __global__ void colorConvert(unsigned char * rgbImage, unsigned char * grayImage, int width, int height) {
+//     const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
+//     int x = offset % width;
+//     int y = (offset-x)/width;
+
+//     }
+// }
+
+
 void getError(cudaError_t err) {
     if(err != cudaSuccess) {
         std::cout << "Error " << cudaGetErrorString(err) << std::endl;
@@ -118,7 +103,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     dim3 blockDims(512,1,1);
     dim3 gridDims((unsigned int) ceil((double)(width*height*3/blockDims.x)), 1, 1 );
 
-    blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
+    colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
 
 
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
@@ -127,8 +112,6 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     getError(cudaFree(dev_output));
 
 }
-
-
 
 
 int main(int argc, char *argv[]){
