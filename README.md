@@ -6,11 +6,10 @@ The goal of this project is to apply filters or edits to existing images using C
 
 ## Usage
 1. This project requires:
-  * A [CUDA enabled NVIDIA GPU](https://developer.nvidia.com/cuda-gpus)
-  * The [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
-    * This toolkit includes `NVCC` - the NVIDIA C/C++ CUDA Compiler
-
-
+* A [CUDA enabled NVIDIA GPU](https://developer.nvidia.com/cuda-gpus)
+* The [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
+  * This toolkit includes `NVCC` - the NVIDIA C/C++ CUDA Compiler
+---
 2. To **compile** the project, execute the following commands:
 ```
 git clone https://github.com/atchisonbrent/361C_Image_Processing.git\
@@ -19,7 +18,7 @@ cd /path/to/361C_Image_Processing
 
 nvcc lodepng.cpp main.cu -o filter
 ```
-
+---
 3. To **execute** the project, run the following command:
 
 For **Windows**:
