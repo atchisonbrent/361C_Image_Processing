@@ -15,7 +15,11 @@ This project requires:
 To compile and run the project, execute the following commands:
 ```
 cd /path/to/361C_Image_Processing
+```
+```
 nvcc lodepng.cpp main.cu -o filter
+```
+```
 ./filter input_image.png output_image.png
 ```
 where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
