@@ -7,8 +7,11 @@ The goal of this project is to apply filters or edits to existing images using C
 ![Bevo](/images/bevo.png)
 
 ## Usage
-This projects requires an NVIDIA GPU and a working installation of nvcc. To compile the project, run "nvcc lodepng.cpp main.cu -o filter"
-
+This projects requires an NVIDIA GPU and a working installation of `NVCC` - the NVIDIA CUDA Compiler.
+To compile the project, run the following command in the main folder directory:
+```
+nvcc lodepng.cpp main.cu -o filter
+```
 ## Outputs 
 ### 1. Blur Image
 ![Invert](/images/blurbevo.png)
