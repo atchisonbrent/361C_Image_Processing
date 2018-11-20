@@ -21,9 +21,10 @@ cd /path/to/361C_Image_Processing
 nvcc lodepng.cpp main.cu -o filter
 ```
 ```
-./filter input_image.png output_image.png
+./filter input_image.png output_image.png <b, g, i, m>
 ```
 Where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
+`<b, g, i, m>` corresponds to `blur`, `greyscale`, `invert`, and `median` respectively.
 
 ## Outputs 
 ### 1. Blur Image
