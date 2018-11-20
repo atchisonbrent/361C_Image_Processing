@@ -96,6 +96,41 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
 }
 
 __global__
+void h_average(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+    
+    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    /* Check if Offset is Within Bounds */
+    if (offset < width * height) {
+        
+        const int currentoffset = offset * 3;
+        
+        /* Get Current Color Values */
+
+        float output_red, output_green, output_blue;
+
+        if(offset > 0 && offset < width*height - 1) {
+            float output_red = (input_image[currentoffset] + input_image[(offset-1)*3] + input_image[(offset+1)*3])/3;
+            float output_green = input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
+            float output_blue = input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;  
+        }
+        else {
+            float output_red = input_image[currentoffset];
+            float output_green = input_image[currentoffset + 1];
+            float output_blue = input_image[currentoffset + 2];  
+        }
+
+
+        float output_red_prev = input_image[]
+        
+        /* Assign Inverted Color Values */
+        output_image[offset * 3] = 255 - output_red;
+        output_image[offset * 3 + 1] = 255 - output_green;
+        output_image[offset * 3 + 2] = 255 - output_blue;
+    }
+}
+
+__global__
 void greyscale(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
     const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
@@ -195,18 +230,11 @@ medianFilter(unsigned char* input_image, unsigned char* output_image, int width,
 			output_image[offset * 3 + 2] = input_image[offset + 2];
 		}
 		else {
-            int i = 0;
-            for (int dx = -1; dx <= 1; dx++){
-                for (int dy = -1; dy <= 1; dy++){
-                    if ((x + dx) > -1 && (x + dx) < width && (y + dy) > -1 && (y + dy) < height) {
-                        const int currentOffset = (offset+dx+dy*width)*3;
-                        filterVectorRed[i] = input_image[currentOffset];
-                        filterVectorGreen[i] = input_image[currentOffset + 1];
-                        filterVectorBlue[i] = input_image[currentOffset + 2];
-                        i++;
-                    }
-                }
-            }
+            const int currentOffset = offset * 3;
+            
+            filterVectorRed[i] = input_image[currentOffset];
+            filterVectorGreen[i] = input_image[currentOffset + 1];
+            filterVectorBlue[i] = input_image[currentOffset + 2];
             
 			sort(filterVectorRed);
 			sort(filterVectorGreen);		
@@ -229,13 +257,14 @@ const int sigma2 = 50;
 __device__ const int FILTER_SIZE = 9;
 __device__ const int FILTER_HALFSIZE = FILTER_SIZE >> 1;
 
-__global__ void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width, int height)
+__global__ 
+void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width, int height)
 {
-	const int x = blockIdx.x * blockDim.x + threadIdx.x;
-	const int y = blockIdx.y * blockDim.y + threadIdx.y;
+    const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
+    int x = offset % width;
+    int y = (offset-x)/width;
 
-	if((x<width) && (y<height))
-	{
+	if(offset < width*height) {
 		float running_total = 0;
 		float norm_factor = 0;
 		const int offset = y * width + x;
@@ -245,17 +274,19 @@ __global__ void bilateral_filter_2d(unsigned char* input, unsigned char* output,
 			{
 				int y_iter = y + xctr;
 				int x_iter = x + yctr;
-				if (0 <= x_iter && x_iter < width && 0 <= y_iter && y_iter < height) 
-				{
-					float intensity_change = input[y_iter * width + x_iter] - input[y * width + x];
-					float v1 = exp(-(xctr * xctr + yctr * yctr) / (2 * sigma1 * sigma1));
-					float v2 = exp(-(intensity_change * intensity_change) / (2 * sigma2 * sigma2));
-					running_total += input[y_iter * width + x_iter] * v1 * v2;
-					norm_factor += v1 * v2;
-				}
+				if (x_iter < 0) x_iter = -x_iter;
+				if (y_iter < 0) y_iter = -y_iter;
+				if (x_iter > width-1) x_iter = width-1-xctr;
+				if (y_iter > height-1) y_iter = height-1-yctr;
+				float intensity_change = input[y_iter * width + x_iter] - input[y * width + x];
+				float w1 = exp(-(xctr * xctr + yctr * yctr) / (2 * sigma1 * sigma1));
+				float w2 = exp(-(intensity_change * intensity_change) / (2 * sigma2 * sigma2));
+				running_total += input[y_iter * width + x_iter] * w1 * w2;
+				norm_factor += w1 * w2;
 			}
 		}
-		output[offset] = running_total / norm_factor;
+        output[offset] = running_total / norm_factor;
+        
 	}
 }
 
