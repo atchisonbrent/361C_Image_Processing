@@ -20,6 +20,23 @@
 #define CHANNELS 3
 
 __global__
+void mirror(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+    
+    int col = 3 * (blockIdx.x * blockDim.x + threadIdx.x);
+    int row = 3 * (blockIdx.y * blockDim.y + threadIdx.y);
+    
+    if ( row >= width || col >= height ) { return; }
+    
+    int col_new = col;
+    int row_new = width - row;
+    
+    int myId = row * height + col;
+    int myId_new = row_new * height + col_new;
+    
+    output_image[myId_new] = input_image[myId];
+}
+
+__global__
 void invert(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
     const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
@@ -193,10 +210,14 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     // colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
     // end = clock();
     // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
+    
+    /* Dimentions */
+    dim3 blockDims(512, 1, 1);
+    dim3 gridDims((unsigned int) ceil((double)(width*height * 3 / blockDims.x)), 1, 1 );
 
     /* Bilateral*/
-    const dim3 blockDims(64,64);
-    const dim3 gridDims(width/64, height/64);
+//    const dim3 blockDims(64, 64);
+//    const dim3 gridDims(width / 64, height / 64);
     
     /* Invert */
 //     invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
@@ -204,8 +225,11 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     /* Greyscale */
 //    greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
+    /* Mirror */
+    mirror<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    
     /* Bilateral Filter */
-    bilateral_filter_2d<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+//    bilateral_filter_2d<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
