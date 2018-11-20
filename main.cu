@@ -127,6 +127,7 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
 
 //     }
 // }
+__device__ float exp(int i) { return exp((float) i); }
 
 const int BLOCKDIM = 32;
 const int sigma1 = 50;
