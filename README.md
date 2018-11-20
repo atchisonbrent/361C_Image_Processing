@@ -12,10 +12,14 @@ This project requires:
 * The [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
   * This toolkit includes `NVCC` - the NVIDIA C/C++ CUDA Compiler
 
-To compile the project, run the following command in the main folder directory:
+To compile and run the project, execute the following commands:
 ```
+cd /path/to/361C_Image_Processing
 nvcc lodepng.cpp main.cu -o filter
+./filter input_image.png output_image.png
 ```
+where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
+
 ## Outputs 
 ### 1. Blur Image
 ![Invert](/images/blurbevo.png)
