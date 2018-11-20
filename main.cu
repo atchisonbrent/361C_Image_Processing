@@ -22,47 +22,22 @@
 __global__
 void mirror(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
-//    int col = blockIdx.x * blockDim.x + threadIdx.x;
-//    int row = blockIdx.y * blockDim.y + threadIdx.y;
-//
-//    if ( col >= height || row >= width ) { return; }
-//
-//    int thread_x = blockDim.x * blockIdx.x + threadIdx.x;
-//    int thread_y = blockDim.y * blockIdx.y + threadIdx.y;
-//
-//    int thread_x_new = thread_x;
-//    int thread_y_new = width - thread_y;
-//
-//    int myId = thread_y * height + thread_x;
-//    int myId_new = thread_y_new * height + thread_x_new;
-//
-//    output_image[myId_new] = input_image[myId];
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if ( row >= width || col >= height ) { return; }
+
+    int thread_x = blockDim.x * blockIdx.x + threadIdx.x;
+    int thread_y = blockDim.y * blockIdx.y + threadIdx.y;
+
+    int thread_x_new = thread_x;
+    int thread_y_new = width - thread_y;
+
+    int myId = thread_y * height + thread_x;
+    int myId_new = thread_y_new * height + thread_x_new;
+
+    output_image[myId_new] = input_image[myId];
     
-    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
-    int x = offset % width;
-    int y = (offset - x) / width;
-    int fsize = 5; // Filter size
-    if(offset < width * height) {
-        
-        float output_red = 0;
-        float output_green = 0;
-        float output_blue = 0;
-        int hits = 0;
-        for(int ox = -fsize; ox < fsize + 1; ++ox) {
-            for(int oy = -fsize; oy < fsize + 1; ++oy) {
-                if((x+ox) > -1 && (x + ox) < width && (y + oy) > -1 && (y + oy) < height) {
-                    const int currentoffset = (offset + ox + oy * width) * 3;
-                    output_red += input_image[currentoffset];
-                    output_green += input_image[currentoffset+1];
-                    output_blue += input_image[currentoffset+2];
-                    hits++;
-                }
-            }
-        }
-        output_image[offset*3] = output_red/hits;
-        output_image[offset*3+1] = output_green/hits;
-        output_image[offset*3+2] = output_blue/hits;
-    }
 }
 
 // __global__ void d_filter(int *g_idata, int *g_odata, unsigned int width, unsigned int height){
@@ -153,8 +128,11 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     dim3 blockDims(512,1,1);
     dim3 gridDims((unsigned int) ceil((double)(width*height*3/blockDims.x)), 1, 1 );
 
-    colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
-
+    colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    
+    const dim3 blockSize(4, 4, 1);
+    const dim3 gridSize(numCols / blockSize.x + 1, numRows / blockSize.y + 1, 1);
+    mirror<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
 
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
