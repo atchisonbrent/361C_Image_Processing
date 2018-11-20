@@ -6,6 +6,7 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
+#include <>
 
 
 #define TILE_W  16
@@ -94,7 +95,8 @@ void mirror(unsigned char* input_image, unsigned char* output_image, int width, 
 
 __global__
 void blur(unsigned char* input_image, unsigned char* output_image, int width, int height) {
-
+    timet_t start, end;
+    start = clock();
     const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
     int x = offset % width;
     int y = (offset-x)/width;
@@ -120,6 +122,8 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         output_image[offset*3+1] = output_green/hits;
         output_image[offset*3+2] = output_blue/hits;
         }
+        end = clock();
+        std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
 }
 
 // __global__ void colorConvert(unsigned char * rgbImage, unsigned char * grayImage, int width, int height) {
