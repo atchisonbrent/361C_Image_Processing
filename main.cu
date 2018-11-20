@@ -183,11 +183,11 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     dim3 blockDims(512,1,1);
     dim3 gridDims((unsigned int) ceil((double)(width*height*3/blockDims.x)), 1, 1 );
 
-    timet_t start, end;
-    start = clock();
-    colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
-    end = clock();
-    std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
+    // timet_t start, end;
+    // start = clock();
+    // colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
+    // end = clock();
+    // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
     
     /* Mirror */
 //    const dim3 blockSize(4, 4, 1);
@@ -197,7 +197,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     /* Invert */
     invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
 
-    invert<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
+    // invert<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
