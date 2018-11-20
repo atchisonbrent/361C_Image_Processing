@@ -56,12 +56,12 @@ void mirror(unsigned char* input_image, unsigned char* output_image, int width, 
 __global__
 void invert(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
-    const unsigned int offset = 3 * (blockIdx.x * blockDim.x + threadIdx.x);
+    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
     
     /* Check if Offset is Within Bounds */
     if (offset < width * height) {
         
-        const int currentoffset = offset;
+        const int currentoffset = offset * 3;
         
         /* Get Current Color Values */
         float output_red = input_image[currentoffset];
@@ -69,21 +69,21 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
         float output_blue = input_image[currentoffset + 2];
         
         /* Assign Inverted Color Values */
-        output_image[offset] = 255 - output_red;
-        output_image[offset + 1] = 255 - output_green;
-        output_image[offset + 2] = 255 - output_blue;
+        output_image[offset * 3] = 255 - output_red;
+        output_image[offset * 3 + 1] = 255 - output_green;
+        output_image[offset * 3 + 2] = 255 - output_blue;
     }
 }
 
 __global__
 void greyscale(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
-    const unsigned int offset = 3 * (blockIdx.x * blockDim.x + threadIdx.x);
+    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
     
     /* Check if Offset is Within Bounds */
     if (offset < width * height) {
         
-        const int currentoffset = offset;
+        const int currentoffset = offset * 3;
         
         /* Get Current Color Values */
         float output_red = 0.21 * input_image[currentoffset];
@@ -92,9 +92,9 @@ void greyscale(unsigned char* input_image, unsigned char* output_image, int widt
         float output_color = output_red + output_green + output_blue;
         
         /* Assign Inverted Color Values */
-        output_image[offset] = output_color;
-        output_image[offset + 1] = output_color;
-        output_image[offset + 2] = output_color;
+        output_image[offset * 3] = output_color;
+        output_image[offset * 3 + 1] = output_color;
+        output_image[offset * 3 + 2] = output_color;
     }
 }
 
