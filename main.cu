@@ -7,8 +7,7 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
-#include <timer.h>
-
+#include <time.h>
 
 #define TILE_W  16
 #define TILE_H  16
@@ -19,22 +18,46 @@
 #define BLOCK_H (TILE_H+(2*R))
 
 #define CHANNELS 3
+
 __global__
 void mirror(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+    
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
-    
-    if ( col >= height || row >= width ) { return; }
-    
+
+    if ( row >= width || col >= height ) { return; }
+
     int thread_x = blockDim.x * blockIdx.x + threadIdx.x;
     int thread_y = blockDim.y * blockIdx.y + threadIdx.y;
-    
+
     int thread_x_new = thread_x;
     int thread_y_new = width - thread_y;
-    
+
     int myId = thread_y * height + thread_x;
     int myId_new = thread_y_new * height + thread_x_new;
+
     output_image[myId_new] = input_image[myId];
+    
+}
+
+__global__
+void invert(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+    
+    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    /* Check if Offset is Within Bounds */
+    if (offset < width * height) {
+
+        /* Get Current Color Values */
+        float output_red = input_image[offset];
+        float output_green = input_image[offset + 1];
+        float output_blue = input_image[offset + 2];
+        
+        /* Assign Inverted Color Values */
+        output_image[offset * 3] = 255 - output_red;
+        output_image[offset * 3 + 1] = 255 - output_green;
+        output_image[offset * 3 + 2] = 255 - output_blue;
+    }
 }
 
 __global__ 
@@ -165,8 +188,17 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
     end = clock();
     std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
+    
+    /* Mirror */
+//    const dim3 blockSize(4, 4, 1);
+//    const dim3 gridSize(width / blockSize.x + 1, height / blockSize.y + 1, 1);
+//    mirror<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
+    
+    /* Invert */
+    invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
 
-
+    invert<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
+    
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
     getError(cudaFree(dev_input));
