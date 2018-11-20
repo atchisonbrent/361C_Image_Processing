@@ -8,6 +8,7 @@ The goal of this project is to apply filters or edits to existing images using C
 
 ## Usage
 This projects requires an NVIDIA GPU and a working installation of `NVCC` - the NVIDIA CUDA Compiler.
+
 To compile the project, run the following command in the main folder directory:
 ```
 nvcc lodepng.cpp main.cu -o filter
