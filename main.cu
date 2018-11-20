@@ -48,9 +48,9 @@ void mirror(unsigned char* input_image, unsigned char* output_image, int width, 
         float output_blue = input_image[currentoffset + 2];
         
         /* Assign Inverted Color Values */
-        output_image[width - offset * 3] = output_red;
-        output_image[width - offset * 3 + 1] = output_green;
-        output_image[width - offset * 3 + 2] = output_blue;
+        output_image[offset * 3] = output_red;
+        output_image[offset * 3 + 1] = output_green;
+        output_image[offset * 3 + 2] = output_blue;
     }
 }
 

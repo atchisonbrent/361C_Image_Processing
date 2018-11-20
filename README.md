@@ -5,10 +5,12 @@ The goal of this project is to apply filters or edits to existing images using C
 ##Timings Go Here
 
 ## Input Image
+Bevo
 ![Bevo](/bevo.png)
 
 ## Usage
 
 ## Outputs 
  1. Blur
- 2. Invert ![Invert](/evilbevo.png)
+ 2. Invert
+ ![Invert](/evilbevo.png)
