@@ -25,7 +25,7 @@ void sort(unsigned char* input){
 		int iMin = i;
 
 		for(int j = i+1; j < 9; j++){
-			if(input[i] < input[iMin]){
+			if(input[j] < input[iMin]){
 				iMin = j;
 			}
 		}
@@ -127,9 +127,9 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         float output_green = 0;
         float output_blue = 0;
         int hits = 0;
-        for(int ox = -fsize; ox < fsize+1; ++ox) {
-            for(int oy = -fsize; oy < fsize+1; ++oy) {
-                if((x+ox) > -1 && (x+ox) < width && (y+oy) > -1 && (y+oy) < height) {
+        for (int ox = -fsize; ox < fsize+1; ++ox) {
+            for (int oy = -fsize; oy < fsize+1; ++oy) {
+                if ((x+ox) > -1 && (x+ox) < width && (y+oy) > -1 && (y+oy) < height) {
                     const int currentoffset = (offset+ox+oy*width)*3;
                     output_red += input_image[currentoffset]; 
                     output_green += input_image[currentoffset+1];
@@ -147,27 +147,27 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
 __global__ void
 medianFilter(unsigned char* input_image, unsigned char* output_image, int width, int height){
 
-    const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
+    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
     int x = offset % width;
-    int y = (offset - x)/width;
+    int y = (offset - x) / width;
 
-    if(offset < width*height){
+    if (offset < width * height){
 
         unsigned char filterVectorRed[9] = {0,0,0,0,0,0,0,0,0};
         unsigned char filterVectorGreen[9] = {0,0,0,0,0,0,0,0,0};
         unsigned char filterVectorBlue[9] = {0,0,0,0,0,0,0,0,0};
 
-        if(y == 0 || y == height - 1 || x == 0 || x == width - 1){
-            output_image[offset*3] = input_image[offset];
-            output_image[offset*3 + 1] = input_image[offset + 1];
-            output_image[offset*3 + 2] = input_image[offset + 2];
+        if (y == 0 || y == height - 1 || x == 0 || x == width - 1){
+            output_image[offset * 3] = input_image[offset * 3];
+            output_image[offset * 3 + 1] = input_image[offset * 3 + 1];
+            output_image[offset * 3 + 2] = input_image[offset * 3 + 2];
         }
-        else{
+        else {
             int i = 0;
             for(int dx = -1; dx <= 1; dx++){
                 for(int dy = -1; dy <= 1; dy++){
-                    if(x+dx >= 0 && x+dx < width && y+dy >= 0 && y+dy < height){
-                        const int currentOffset = (offset+dx+dy*width)*3;
+                    if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height){
+                        const int currentOffset = (offset + dx + dy * width) * 3;
                         filterVectorRed[i] = input_image[currentOffset];
                         filterVectorGreen[i] = input_image[currentOffset + 1];
                         filterVectorBlue[i] = input_image[currentOffset + 2];
@@ -179,9 +179,9 @@ medianFilter(unsigned char* input_image, unsigned char* output_image, int width,
             sort(filterVectorGreen);
             sort(filterVectorBlue);
 
-            output_image[offset*3] = filterVectorRed[4];
-            output_image[offset*3 + 1] = filterVectorGreen[4];
-            output_image[offset*3 + 2] = filterVectorBlue[4];
+            output_image[offset * 3] = filterVectorRed[4];
+            output_image[offset * 3 + 1] = filterVectorGreen[4];
+            output_image[offset * 3 + 2] = filterVectorBlue[4];
         }
     }
 }
