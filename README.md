@@ -10,16 +10,16 @@ This project requires:
 * The [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
   * This toolkit includes `NVCC` - the NVIDIA C/C++ CUDA Compiler
 
+
 To **compile** the project, execute the following commands:
 ```
-git clone https://github.com/atchisonbrent/361C_Image_Processing.git
-```
-```
+git clone https://github.com/atchisonbrent/361C_Image_Processing.git\
+
 cd /path/to/361C_Image_Processing
-```
-```
+
 nvcc lodepng.cpp main.cu -o filter
 ```
+
 
 To **execute** the project, run the following command:
 
