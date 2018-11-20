@@ -133,7 +133,7 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
     const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
     int x = offset % width;
     int y = (offset-x)/width;
-    int fsize = 5; // Filter size
+    int fsize = 3; // Filter size
     if(offset < width*height) {
 
         float output_red = 0;
@@ -157,13 +157,6 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         }
 }
 
-// __global__ void colorConvert(unsigned char * rgbImage, unsigned char * grayImage, int width, int height) {
-//     const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
-//     int x = offset % width;
-//     int y = (offset-x)/width;
-
-//     }
-// }
 __device__ float exp(int i) { return exp((float) i); }
 
 const int BLOCKDIM = 32;
@@ -201,7 +194,8 @@ void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width,
 				norm_factor += w1 * w2;
 			}
 		}
-		output[offset] = running_total / norm_factor;
+        output[offset] = running_total / norm_factor;
+        
 	}
 }
 
@@ -220,18 +214,15 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
  
     getError(cudaMalloc( (void**) &dev_output, width*height*3*sizeof(unsigned char)));
 
-    // dim3 blockDims(512,1,1);
-    // dim3 gridDims((unsigned int) ceil((double)(width*height*3/blockDims.x)), 1, 1 );
-
-    // timet_t start, end;
-    // start = clock();
-    // colorConvert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
-    // end = clock();
-    // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
-    
     /* Dimentions */
     dim3 blockDims(512, 1, 1);
     dim3 gridDims((unsigned int) ceil((double)(width*height * 3 / blockDims.x)), 1, 1 );
+
+    // timet_t start, end;
+    // start = clock();
+    blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height); 
+    // end = clock();
+    // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
 
     /* Bilateral*/
 //    const dim3 blockDims(64, 64);
@@ -244,7 +235,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
 //    greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
     /* Mirror */
-    mirror<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+    // mirror<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
     /* Bilateral Filter */
 //    bilateral_filter_2d<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
