@@ -205,7 +205,7 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         output_image[offset*3] = output_red/hits;
         output_image[offset*3+1] = output_green/hits;
         output_image[offset*3+2] = output_blue/hits;
-        }
+    }
 }
 
 __global__ void
@@ -323,25 +323,21 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
         case 'b':
         case 'B':
             blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-            break;
             
         /* Greyscale */
         case 'g':
         case 'G':
             greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-            break;
             
         /* Invert */
         case 'i':
         case 'I':
             invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-            break;
         
         /* Median */
         case 'm':
         case 'M':
             medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
-            break;
         
         /* Invalid Argument */
         default:
