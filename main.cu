@@ -196,7 +196,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     /* Invert */
     invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
-    /* GreyScale */
+    /* Greyscale */
     greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
     
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
