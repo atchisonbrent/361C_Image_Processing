@@ -27,15 +27,15 @@ nvcc lodepng.cpp main.cu -o filter
 
 For **Windows**:
 ```
-filter.exe input_image.png output_image.png <b, g, i>
+filter.exe input_image.png output_image.png <b, g, i, m>
 ```
 For **Mac** or **Linux**:
 ```
-./filter input_image.png output_image.png <b, g, i>
+./filter input_image.png output_image.png <b, g, i, m>
 ```
 Where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
 
-`<b, g, i>` correspond to `blur`, `greyscale`, and `invert` respectively.
+`<b, g, i, m>` correspond to `blur`, `greyscale`, `invert`, and `median` respectively.
 
 ***
 
