@@ -15,6 +15,24 @@
 #define BLOCK_W (TILE_W+(2*R))
 #define BLOCK_H (TILE_H+(2*R))
 
+__global__
+void mirror(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    
+    if ( col >= height || row >= width ) { return; }
+    
+    int thread_x = blockDim.x * blockIdx.x + threadIdx.x;
+    int thread_y = blockDim.y * blockIdx.y + threadIdx.y;
+    
+    int thread_x_new = thread_x;
+    int thread_y_new = width - thread_y;
+    
+    int myId = thread_y * height + thread_x;
+    int myId_new = thread_y_new * height + thread_x_new;
+    output_image[myId_new] = input_image[myId];
+}
+
 // __global__ void d_filter(int *g_idata, int *g_odata, unsigned int width, unsigned int height){
 //     __shared__ int smem[BLOCK_W*BLOCK_H];
 //     int x = blockIdx.x*TILE_W + threadIdx.x - R;
