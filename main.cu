@@ -176,11 +176,11 @@ __device__ const int FILTER_HALFSIZE = FILTER_SIZE >> 1;
 __global__ 
 void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width, int height)
 {
-	const int x = blockIdx.x * blockDim.x + threadIdx.x;
-	const int y = blockIdx.y * blockDim.y + threadIdx.y;
+    const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
+    int x = offset % width;
+    int y = (offset-x)/width;
 
-	if((x<width) && (y<height))
-	{
+	if(offset < width*height) {
 		float running_total = 0;
 		float norm_factor = 0;
 		const int offset = y * width + x;
