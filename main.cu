@@ -19,6 +19,25 @@
 
 #define CHANNELS 3
 
+__device__ 
+void sort(unsigned char* input){
+	for(int i = 0; i < 8; i++){
+		int iMin = i;
+
+		for(int j = i+1; j < 9; j++){
+			if(input[i] < input[iMin]){
+				iMin = j;
+			}
+		}
+		
+		if(iMin != i){
+			unsigned char temp = input[i];
+			input[i] = input[iMin];
+			input[iMin] = temp;
+		}
+	}
+}
+
 __global__
 void mirror(unsigned char* input_image, unsigned char* output_image, int width, int height) {
     
@@ -155,6 +174,49 @@ void blur(unsigned char* input_image, unsigned char* output_image, int width, in
         output_image[offset*3+1] = output_green/hits;
         output_image[offset*3+2] = output_blue/hits;
         }
+}
+
+__global__ 
+medianFilter(unsigned char* input_image, unsigned char* output_image, int width, int height){
+
+	const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
+	int x = offset % width;
+	int y = (offset - x)/width;
+
+	if(offset < width*height){
+	
+		unsigned char filterVectorRed[9] = {0,0,0,0,0,0,0,0,0};
+		unsigned char filterVectorGreen[9] = {0,0,0,0,0,0,0,0,0};
+		unsigned char filterVectorBlue[9] = {0,0,0,0,0,0,0,0,0};
+
+		if(row == 0 || row == height - 1 || col == 0 || col = width - 1){
+			output_image[offset*3] = input_image[offset];
+			output_image[offset*3 + 1] = input_image[offset + 1];
+			output_image[offset*3 + 2] = input_image[offset + 2];
+		}
+		else{
+			int i = 0;
+			for(int dx = -1; dx <= 1; dx++){
+				for(int dy = -1; dy <= 1; dy++){
+					if(x+dx >= 0 && x+dx < width && y+dy >= 0 && y+dy < height){
+						const int currentOffset = (offset+dx+dy*width)*3;
+						filterVectorRed[i] = input_image[currentOffset];
+						filterVectorGreen[i] = input_image[currentOffset + 1];
+						filterVectorBlue[i] = input_image[currentOffset + 2];
+						i++;
+					}
+				}
+			}
+			sort(&filterVectorRed);
+			sort(&filterVectorGreen);		
+			sort(&filterVectorBlue);
+
+			output_image[offset*3] = filterVectorRed[4];
+			output_image[offset*3 + 1] = filterVectorGreen[4];
+			output_image[offset*3 + 2] = filterVectorBlue[4];
+		}
+	}
+
 }
 
 __device__ float exp(int i) { return exp((float) i); }
