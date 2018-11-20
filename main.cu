@@ -6,8 +6,7 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
-#include <>
-
+#include <time.h>
 
 #define TILE_W  16
 #define TILE_H  16
@@ -38,6 +37,26 @@ void mirror(unsigned char* input_image, unsigned char* output_image, int width, 
 
     output_image[myId_new] = input_image[myId];
     
+}
+
+__global__
+void invert(unsigned char* input_image, unsigned char* output_image, int width, int height) {
+    
+    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    /* Check if Offset is Within Bounds */
+    if (offset < width * height) {
+
+        /* Get Current Color Values */
+        float output_red = input_image[offset];
+        float output_green = input_image[offset + 1];
+        float output_blue = input_image[offset + 2];
+        
+        /* Assign Inverted Color Values */
+        output_image[offset * 3] = 255 - output_red;
+        output_image[offset * 3 + 1] = 255 - output_green;
+        output_image[offset * 3 + 2] = 255 - output_blue;
+    }
 }
 
 __global__ 
@@ -132,10 +151,15 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
     
     /* Mirror */
-    const dim3 blockSize(4, 4, 1);
-    const dim3 gridSize(numCols / blockSize.x + 1, numRows / blockSize.y + 1, 1);
-    mirror<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
+//    const dim3 blockSize(4, 4, 1);
+//    const dim3 gridSize(width / blockSize.x + 1, height / blockSize.y + 1, 1);
+//    mirror<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
+    
+    /* Invert */
+    invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
 
+    invert<<<gridSize, blockSize>>>(dev_input, dev_output, width, height);
+    
     getError(cudaMemcpy(output_image, dev_output, width*height*3*sizeof(unsigned char), cudaMemcpyDeviceToHost ));
 
     getError(cudaFree(dev_input));
