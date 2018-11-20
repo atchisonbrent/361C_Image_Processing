@@ -1,8 +1,12 @@
 # Image Processing Using C++ and CUDA
 The goal of this project is to apply filters or edits to existing images using CUDA to highly parallelize the compute operations.
 
+---
+
 ## Input Image
 ![Bevo](/images/bevo.png)
+
+---
 
 ## Usage
 1. This project requires:
@@ -31,7 +35,9 @@ For **Mac** or **Linux**:
 ```
 Where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
 
-`<b, g, i>` corresponds to `blur`, `greyscale`, and `invert` respectively.
+`<b, g, i>` correspond to `blur`, `greyscale`, and `invert` respectively.
+
+---
 
 ## Outputs 
 ### 1. Blur Image
