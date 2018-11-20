@@ -51,6 +51,7 @@ void mirror(unsigned char* input_image, unsigned char* output_image, int width, 
         output_image[width - offset * 3] = output_red;
         output_image[width - offset * 3 + 1] = output_green;
         output_image[width - offset * 3 + 2] = output_blue;
+    }
 }
 
 __global__
