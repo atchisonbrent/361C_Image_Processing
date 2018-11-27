@@ -9,16 +9,6 @@
 #include <stdio.h>
 #include <time.h>
 
-#define TILE_W  16
-#define TILE_H  16
-#define R        2
-#define D       (R*2+1)
-#define S    (D*D)
-#define BLOCK_W (TILE_W+(2*R))
-#define BLOCK_H (TILE_H+(2*R))
-
-#define CHANNELS 3
-
 __device__ 
 void sort(unsigned char* input){
 	for(int i = 0; i < 8; i++){
