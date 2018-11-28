@@ -1,13 +1,6 @@
 #include "lodepng.h"
-// #include "helper_cuda.h"
 #include <iostream>
-#include <cuda.h>
-#include <cuda_runtime.h>
-
-#include <math.h>
-#include <algorithm>
 #include <stdio.h>
-#include <time.h>
 #include <chrono>
 
 __device__ 
@@ -50,38 +43,6 @@ void invert(unsigned char* input_image, unsigned char* output_image, int width, 
         output_image[offset * 3 + 2] = 255 - output_blue;
     }
 }
-
-//__global__
-//void h_average(unsigned char* input_image, unsigned char* output_image, int width, int height) {
-//
-//    const unsigned int offset = blockIdx.x * blockDim.x + threadIdx.x;
-//
-//    /* Check if Offset is Within Bounds */
-//    if (offset < width * height) {
-//
-//        const int currentoffset = offset * 3;
-//
-//        /* Get Current Color Values */
-//
-//        float output_red, output_green, output_blue;
-//
-//        if(offset > 0 && offset < width*height - 1) {
-//            float output_red = (input_image[currentoffset] + input_image[(offset-1)*3] + input_image[(offset+1)*3])/3;
-//            float output_green = (input_image[currentoffset + 1] + input_image[(offset-1)*3 + 1] + input_image[(offset+1)*3 + 1])/3;
-//            float output_blue = (input_image[currentoffset + 2] + input_image[(offset-1)*3 + 2] + input_image[(offset+1)*3 + 2])/3;
-//        }
-//        else {
-//            float output_red = input_image[currentoffset];
-//            float output_green = input_image[currentoffset + 1];
-//            float output_blue = input_image[currentoffset + 2];
-//        }
-//
-//        /* Assign Inverted Color Values */
-//        output_image[offset * 3] = 255 - output_red;
-//        output_image[offset * 3 + 1] = 255 - output_green;
-//        output_image[offset * 3 + 2] = 255 - output_blue;
-//    }
-//}
 
 __global__
 void greyscale(unsigned char* input_image, unsigned char* output_image, int width, int height) {
@@ -177,48 +138,6 @@ medianFilter(unsigned char* input_image, unsigned char* output_image, int width,
     }
 }
 
-__device__ float exp(int i) { return exp((float) i); }
-
-const int BLOCKDIM = 32;
-const int sigma1 = 50;
-const int sigma2 = 50;
-
-__device__ const int FILTER_SIZE = 9;
-__device__ const int FILTER_HALFSIZE = FILTER_SIZE >> 1;
-
-__global__ 
-void bilateral_filter_2d(unsigned char* input, unsigned char* output, int width, int height)
-{
-    const unsigned int offset = blockIdx.x*blockDim.x + threadIdx.x;
-    int x = offset % width;
-    int y = (offset-x)/width;
-
-	if(offset < width*height) {
-		float running_total = 0;
-		float norm_factor = 0;
-		const int offset = y * width + x;
-		for (int xctr = -FILTER_HALFSIZE; xctr <= FILTER_HALFSIZE; xctr++) 
-		{
-			for (int yctr = -FILTER_HALFSIZE; yctr <= FILTER_HALFSIZE; yctr++) 
-			{
-				int y_iter = y + xctr;
-				int x_iter = x + yctr;
-				if (x_iter < 0) x_iter = -x_iter;
-				if (y_iter < 0) y_iter = -y_iter;
-				if (x_iter > width-1) x_iter = width-1-xctr;
-				if (y_iter > height-1) y_iter = height-1-yctr;
-				float intensity_change = input[y_iter * width + x_iter] - input[y * width + x];
-				float w1 = exp(-(xctr * xctr + yctr * yctr) / (2 * sigma1 * sigma1));
-				float w2 = exp(-(intensity_change * intensity_change) / (2 * sigma2 * sigma2));
-				running_total += input[y_iter * width + x_iter] * w1 * w2;
-				norm_factor += w1 * w2;
-			}
-		}
-        output[offset] = running_total / norm_factor;
-        
-	}
-}
-
 void getError(cudaError_t err) {
     if(err != cudaSuccess) {
         std::cout << "Error " << cudaGetErrorString(err) << std::endl;
@@ -238,10 +157,6 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     dim3 blockDims(512, 1, 1);
     dim3 gridDims((unsigned int) ceil((double)(width*height * 3 / blockDims.x)), 1, 1 );
 
-    // timet_t start, end;
-    // start = clock();
-    // end = clock();
-    // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
     auto start = std::chrono::high_resolution_clock::now();
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
@@ -253,7 +168,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
             blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
             stop = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-            std::cout << duration.count() << std::endl; 
+            std::cout << duration.count() << " microseconds" << std::endl;  
             break;
             
         /* Greyscale */
@@ -263,7 +178,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
             greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
             stop = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-            std::cout << duration.count() << std::endl; 
+            std::cout << duration.count() << " microseconds" << std::endl; 
             break;
             
         /* Invert */
@@ -273,7 +188,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
             invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
             stop = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-            std::cout << duration.count() << std::endl; 
+            std::cout << duration.count() << " microseconds" << std::endl; 
             break;
         
         /* Median */
@@ -283,7 +198,7 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
             medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
             stop = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-            std::cout << duration.count() << std::endl; 
+            std::cout << duration.count() << " microseconds" << std::endl; 
             break;
         
         /* Invalid Argument */
@@ -309,11 +224,11 @@ int main(int argc, char *argv[]){
     std::vector<unsigned char> in_image;
     unsigned int width, height;
 
-    // Load the data
+    // Load the image
     unsigned error = lodepng::decode(in_image, width, height, input_file);
     if(error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 
-    // Prepare the data
+    // Remove alpha channel
     unsigned char* input_image = new unsigned char[(in_image.size()*3)/4];
     unsigned char* output_image = new unsigned char[(in_image.size()*3)/4];
     int where = 0;
@@ -325,7 +240,7 @@ int main(int argc, char *argv[]){
        }
     }
 
-    // Run the filter on it
+    // Run the filter
     if (argc < 4) {
         printf("Invalid Usage\n");
         printf("Command should be of the form: ./filter input_image.png output_image.png <b, g, i, m>\n");
@@ -333,7 +248,7 @@ int main(int argc, char *argv[]){
     }
     else { filter(input_image, output_image, width, height, argv[3]); }
 
-    // Prepare data for output
+    // Reinsert alpha channel
     std::vector<unsigned char> out_image;
     for(int i = 0; i < in_image.size(); ++i) {
         out_image.push_back(output_image[i]);

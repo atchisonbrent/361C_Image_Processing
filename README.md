@@ -54,6 +54,32 @@ Where `input_image.png` is the original image and `output_image.png` is an exist
 
 ***
 
+## Sequential Testing
+This section explains how to compile and execute the sequential versions of the filters.
+1. To **compile** this portion, execute the following commands:
+```
+git clone https://github.com/atchisonbrent/361C_Image_Processing.git
+
+cd /path/to/361C_Image_Processing
+
+g++ lodepng.cpp sequential.cpp -o seq
+```
+---
+2. To **execute** the portion, run the following command:
+For **Windows**:
+```
+seq.exe input_image.png output_image.png <b, g, i, m>
+```
+For **Mac** or **Linux**:
+```
+./seq input_image.png output_image.png <b, g, i, m>
+```
+Where `input_image.png` is the original image and `output_image.png` is an existing png file to be replaced.
+
+`<b, g, i, m>` correspond to `blur`, `greyscale`, `invert`, and `median` respectively.
+
+***
+
 ## Timings
 ### 1. Blur Image
 #### CUDA
