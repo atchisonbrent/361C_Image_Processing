@@ -231,12 +231,12 @@ int main(int argc, char *argv[]){
     // Remove alpha channel
     unsigned char* input_image = new unsigned char[(in_image.size()*3)/4];
     unsigned char* output_image = new unsigned char[(in_image.size()*3)/4];
-    int where = 0;
+    int index = 0;
     for(int i = 0; i < in_image.size(); ++i) {
        if((i+1) % 4 != 0) {
-           input_image[where] = in_image.at(i);
-           output_image[where] = 255;
-           where++;
+           input_image[index] = in_image.at(i);
+           output_image[index] = 255;
+           index++;
        }
     }
 
