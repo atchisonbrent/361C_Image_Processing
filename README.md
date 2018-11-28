@@ -51,3 +51,27 @@ Where `input_image.png` is the original image and `output_image.png` is an exist
 ![Input](/images/med_before.png)
 #### After
 ![Output](/images/med_after.png)
+
+***
+
+## Timings
+### 1. Blur Image
+#### CUDA
+Average of 10 Iterations: 35.3 microseconds
+#### Sequential
+Average of 10 Iterations: 102069.4 microseconds
+### 2. Invert Colors
+#### CUDA
+Average of 10 Iterations: 38.4 microseconds
+#### Sequential
+Average of 10 Iterations:  3498.8 microseconds
+### 3. Greyscale
+#### CUDA
+Average of 10 Iterations: 43 microseconds
+#### Sequential
+Average of 10 Iterations: 3998 microseconds
+### 4. Median Restore
+#### CUDA
+Average of 10 Iterations: 29 microseconds
+#### Sequential
+Average of 10 Iterations: 29155.1 microseconds

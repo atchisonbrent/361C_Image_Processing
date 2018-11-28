@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <stdio.h>
 #include <time.h>
+#include <chrono>
 
 __device__ 
 void sort(unsigned char* input){
@@ -241,31 +242,48 @@ void filter (unsigned char* input_image, unsigned char* output_image, int width,
     // start = clock();
     // end = clock();
     // std::cout << "Blur Filter took " << (end-start)/CLOCKS_PER_SEC << " ms\n";
-    
+    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
     switch (arg[0]) {
-        
         /* Blur */
         case 'b':
         case 'B':
+            start = std::chrono::high_resolution_clock::now();
             blur<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << duration.count() << std::endl; 
             break;
             
         /* Greyscale */
         case 'g':
         case 'G':
+            start = std::chrono::high_resolution_clock::now();
             greyscale<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << duration.count() << std::endl; 
             break;
             
         /* Invert */
         case 'i':
         case 'I':
+            start = std::chrono::high_resolution_clock::now();
             invert<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << duration.count() << std::endl; 
             break;
         
         /* Median */
         case 'm':
         case 'M':
+            start = std::chrono::high_resolution_clock::now();
             medianFilter<<<gridDims, blockDims>>>(dev_input, dev_output, width, height);
+            stop = std::chrono::high_resolution_clock::now();
+            duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+            std::cout << duration.count() << std::endl; 
             break;
         
         /* Invalid Argument */
