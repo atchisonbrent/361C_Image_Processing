@@ -226,7 +226,7 @@ int main(int argc, char *argv[]){
 
     // Load the image
     unsigned error = lodepng::decode(in_image, width, height, input_file);
-    if(error) std::cout << "decoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+    if(error) std::cout << "error " << error << ": " << lodepng_error_text(error) << std::endl;
 
     // Remove alpha channel
     unsigned char* input_image = new unsigned char[(in_image.size()*3)/4];
